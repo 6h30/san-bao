@@ -13,7 +13,7 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);
   font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;user-select:none;-webkit-user-select:none}
-canvas{position:fixed;inset:0;display:block;touch-action:none}
+#cv{position:fixed;inset:0;display:block;touch-action:none}
 button{font:inherit;color:inherit;cursor:pointer}
 
 /* ---------- menu ---------- */
@@ -31,8 +31,15 @@ h1{text-shadow:0 2px 18px rgba(0,0,0,.7)}
 /* ---------- gara trưng bày ---------- */
 .coins{margin-left:10px;background:#2b2412;border:1px solid #6b5521;color:#ffd36b;border-radius:20px;padding:3px 12px;font-size:13px;letter-spacing:.02em;text-transform:none;font-weight:700}
 #garage{background:linear-gradient(#141c25,#10171e);border:1px solid var(--line);border-radius:18px;overflow:hidden}
-.hero{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:0;position:relative}
-@media(max-width:760px){.hero{grid-template-columns:1fr}}
+.hero{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:0;position:relative}
+@media(max-width:860px){.hero{grid-template-columns:1fr}}
+.gscene{position:relative;background:#0b0f14}
+.gscene canvas{display:block;width:100%;aspect-ratio:900/520;cursor:pointer;touch-action:manipulation}
+.gcap{position:absolute;left:10px;bottom:8px;font-size:11px;color:rgba(255,255,255,.7);background:rgba(8,12,16,.6);border-radius:8px;padding:2px 8px;pointer-events:none}
+.banner{width:100%;height:110px;object-fit:cover;border-radius:10px;margin-bottom:12px;display:block}
+.banner.locked{filter:grayscale(1) brightness(.35)}
+.chip{display:inline-block;font-size:11px;font-weight:700;border-radius:12px;padding:2px 10px;margin-bottom:8px;border:1px solid}
+.chip.own{color:var(--green);border-color:#2f7a52}.chip.lock{color:#ffd36b;border-color:#6b5521}
 .stage{position:relative;background:radial-gradient(ellipse at 50% 85%,#3a4654 0,#1b232d 55%,#10171e 100%);min-height:260px}
 .stage img{width:100%;height:100%;object-fit:cover;display:block;aspect-ratio:4/3}
 .stage.locked img{filter:grayscale(1) brightness(.35) contrast(1.1)}
@@ -210,8 +217,10 @@ kbd{background:#0d151d;border:1px solid var(--line);border-bottom-width:2px;bord
 
   <h2>1 · Gara của bạn <span class="coins" id="coins"></span></h2>
   <div id="garage">
-    <div class="hero" id="hero"></div>
-    <div class="shelf" id="shelf"></div>
+    <div class="hero">
+      <div class="gscene"><canvas id="gcv"></canvas><div class="gcap">Bấm vào chỗ đậu để xem xe</div></div>
+      <div class="info" id="ginfo"></div>
+    </div>
   </div>
 
   <h2>2 · Chọn mùa bão <button class="linkbtn" id="unlockAll">mở khóa tất cả mùa</button><button class="linkbtn" id="cheatCoins">+1000 xu (chơi thử)</button></h2>
@@ -551,7 +560,7 @@ function togglePause(force){
 }
 function toMenu(){
   G=null;paused=false;$('hud').style.display='none';$('touch').style.display='none';$('ov').style.display='none';
-  $('menu').style.display='block';if(AC)audioTick(0,0,false);view=sel.veh;sure=null;refreshMenu();
+  $('menu').style.display='block';if(AC)audioTick(0,0,false);view=sel.veh;sure=null;refreshMenu();parkAll(true);
 }
 let toastTimer=0;
 function toast(t,warn){
@@ -1130,26 +1139,19 @@ function renderGarage(){
   else act=sure===v.id
     ?'<button class="btn sm sure" id="buyBtn">Bấm lần nữa để mua</button><span class="hint2">'+price+' xu</span>'
     :'<button class="btn sm buy" id="buyBtn">Mua · '+price+' xu</button>';
-  $('hero').innerHTML=
-    '<div class="stage'+(own?'':' locked')+'"><img src="img/card_'+v.id+'.jpg" alt=""'+imgErr+'>'+
-    (own?'<span class="badge own">Đã có trong gara</span>':'<span class="badge lock">Chưa sở hữu · '+price+' xu</span><div class="padlock">🔒</div>')+'</div>'+
-    '<div class="info"><div class="nm">'+v.name+'</div><div class="sb">'+v.sub+'</div>'+
+  $('ginfo').innerHTML=
+    '<img class="banner'+(own?'':' locked')+'" src="img/card_'+v.id+'.jpg" alt=""'+imgErr+'>'+
+    (own?'<span class="chip own">Đã có trong gara</span>':'<span class="chip lock">Chưa sở hữu · '+price+' xu</span>')+
+    '<div class="nm">'+v.name+'</div><div class="sb">'+v.sub+'</div>'+
     '<div class="st"><span>Tốc độ</span>'+bar('',v.speed/265*100)+
     '<span>Giáp</span>'+bar('',v.armor/.45*100)+
     '<span>Gió (thường)</span>'+bar('a',v.rU/260*100)+
     '<span>Gió (ghim)</span>'+bar('a',v.canDeploy?v.rD/420*100:v.rU/420*100)+
     '<span>Ghi dữ liệu</span>'+bar('g',v.data/1.25*100)+'</div>'+
     '<div class="trait">'+v.trait+'</div><div class="fact">'+v.fact+'</div>'+
-    '<div class="act">'+act+'</div></div>';
+    '<div class="act">'+act+'</div>';
   const ub=$('useBtn');if(ub)ub.onclick=()=>{sel.veh=v.id;refreshMenu();};
   const bb=$('buyBtn');if(bb)bb.onclick=()=>buyVehicle(v.id);
-  $('shelf').innerHTML=VEHICLES.map(x=>{
-    const o=owns(x.id);
-    return '<button class="slot'+(o?'':' locked')+(x.id===view?' view':'')+(x.id===sel.veh?' play':'')+'" data-id="'+x.id+'">'+
-      '<img src="img/card_'+x.id+'.jpg" alt=""'+imgErr+'>'+(o?'':'<div class="lk">🔒</div>')+(x.id===sel.veh?'<span class="tick">ĐANG DÙNG</span>':'')+
-      '<div class="nm2">'+x.name+'</div><div class="st2">'+(o?'Đã có':(PRICE[x.id]+' xu'))+'</div></button>';
-  }).join('');
-  $('shelf').querySelectorAll('.slot').forEach(s=>s.onclick=()=>{view=s.dataset.id;sure=null;renderGarage();});
   const n=save.owned.length;
   $('coins').textContent='🪙 '+save.coins+' xu · '+n+'/'+VEHICLES.length+' xe';
 }
@@ -1159,9 +1161,222 @@ function buyVehicle(id){
   if(sure!==id){sure=id;clearTimeout(sureTimer);sureTimer=setTimeout(()=>{sure=null;renderGarage();},3500);renderGarage();return;}
   clearTimeout(sureTimer);sure=null;
   save.coins-=price;save.owned.push(id);sel.veh=id;writeSave();
-  if(AC&&!muted)sfx(660,.35,'triangle',.2,1.5);
+  initAudio();sfx(660,.35,'triangle',.2,1.5);setTimeout(()=>sfx(120,.9,'sawtooth',.08,2.2),250);
+  gcars[id]={p:0,dir:1,run:1,delay:.15,dur:carDur(id)};          // xe mới chạy vào đậu
   refreshMenu();
 }
+
+/* =========================================================
+   Nhà gara: cắt mái nhìn từ trên xuống, xe chạy vào đậu
+   ========================================================= */
+const GW=900,GH=520,GX0=140,GX1=870,AISLE=260;
+const BAY_ORDER=['tiv1','tiv2','tiv3','dom3','arma','dow'];
+const BAY_W=(GX1-GX0)/3;
+const SHORT={tiv1:'TIV 1',tiv2:'TIV 2',tiv3:'TIV 3',dom3:'DOMINATOR 3',arma:'ARMADILLO',dow:'DOPPLER ON WHEELS'};
+const BAYS=BAY_ORDER.map((id,i)=>{
+  const col=i%3,top=i<3,x=GX0+BAY_W*col;
+  return {id,x,w:BAY_W,top,y:top?38:308,h:176,cx:x+BAY_W/2,cy:top?126:398,hd:top?-Math.PI/2:Math.PI/2};
+});
+const gcv=$('gcv'),gctx=gcv.getContext('2d');
+let gW=0,gBG=null,gHover=null,glast=performance.now(),starting=false;
+const gcars={};                   // id -> {p (0..1 dọc đường vào), dir, run, delay, dur}
+const gpaths={},gsil={};
+
+function bayOf(id){return BAYS.find(b=>b.id===id);}
+// đường vào gara: chạy thẳng theo lối đi, rẽ cung tròn vào chỗ đậu, tiến thẳng tới cuối
+function pathOf(id){
+  if(gpaths[id])return gpaths[id];
+  const b=bayOf(id),R=62,dy=b.top?-1:1,pts=[];
+  for(let x=-110;x<b.cx-R;x+=10)pts.push([x,AISLE]);
+  for(let i=0;i<=16;i++){const t=i/16,u=1-t;
+    pts.push([u*u*(b.cx-R)+2*u*t*b.cx+t*t*b.cx,u*u*AISLE+2*u*t*AISLE+t*t*(AISLE+dy*R)]);}
+  const end=b.cy;
+  for(let y=AISLE+dy*R;dy*(end-y)>0;y+=dy*10)pts.push([b.cx,y]);
+  pts.push([b.cx,end]);
+  const cum=[0];for(let i=1;i<pts.length;i++)cum.push(cum[i-1]+Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]));
+  return gpaths[id]={pts,cum,len:cum[cum.length-1]};
+}
+function carDur(id){return pathOf(id).len/430;}
+const easeOut=t=>1-Math.pow(1-t,3);
+function poseAt(id,p){
+  const P=pathOf(id),s=easeOut(clamp(p,0,1))*P.len;
+  let i=1;while(i<P.pts.length-1&&P.cum[i]<s)i++;
+  const a=P.pts[i-1],b=P.pts[i],seg=(P.cum[i]-P.cum[i-1])||1,t=clamp((s-P.cum[i-1])/seg,0,1);
+  return {x:a[0]+(b[0]-a[0])*t,y:a[1]+(b[1]-a[1])*t,hd:Math.atan2(b[1]-a[1],b[0]-a[0]),moving:p>0&&p<1};
+}
+// cho mọi xe đã có chạy vào đậu lần lượt
+function parkAll(animated){
+  BAY_ORDER.forEach((id,i)=>{
+    if(!owns(id)){delete gcars[id];return;}
+    gcars[id]=animated?{p:0,dir:1,run:1,delay:.2+i*.45,dur:carDur(id)}:{p:1,dir:1,run:0,delay:0,dur:1};
+  });
+}
+function silhouette(id){
+  const S=sp('veh_'+id);if(!S)return null;
+  if(gsil[id])return gsil[id];
+  const c=document.createElement('canvas');c.width=S.naturalWidth;c.height=S.naturalHeight;
+  const x=c.getContext('2d');x.drawImage(S,0,0);x.globalCompositeOperation='source-in';x.fillStyle='#07090c';x.fillRect(0,0,c.width,c.height);
+  return gsil[id]=c;
+}
+function carSize(id){
+  const def=VEHICLES.find(v=>v.id===id),S=sp('veh_'+id),L=def.len*2.55;
+  return {L,H:S?L*S.naturalHeight/S.naturalWidth:L*.4};
+}
+function drawCarSprite(g,id,x,y,hd,sil,alpha){
+  const {L,H}=carSize(id),S=sil?silhouette(id):sp('veh_'+id);
+  g.save();g.translate(x,y);g.rotate(hd);g.globalAlpha=alpha==null?1:alpha;
+  if(S)g.drawImage(S,-L/2,-H/2,L,H);
+  else{g.fillStyle=sil?'#07090c':VEHICLES.find(v=>v.id===id).color;g.fillRect(-L/2,-H/2,L,H);}
+  g.restore();
+}
+
+// nền nhà gara vẽ một lần cho mỗi cỡ màn hình
+function renderGBG(){
+  const k=gW/GW,off=document.createElement('canvas');off.width=gW;off.height=Math.round(GH*k);
+  const g=off.getContext('2d');g.scale(k,k);
+  // ngoài trời: cỏ + lối xe vào
+  g.fillStyle='#2b4228';g.fillRect(0,0,GW,GH);
+  const ap=g.createLinearGradient(0,0,GX0,0);ap.addColorStop(0,'#2b2f35');ap.addColorStop(1,'#3d434a');
+  g.fillStyle=ap;g.fillRect(0,196,GX0+2,128);
+  g.fillStyle='#d9c25a';for(let x=6;x<GX0-10;x+=34)g.fillRect(x,AISLE-1.5,20,3);
+  g.fillStyle='rgba(0,0,0,.28)';g.fillRect(0,196,GX0,3);g.fillRect(0,321,GX0,3);
+  for(const [x,y,r] of [[34,60,30],[92,38,22],[40,150,18],[28,440,32],[96,478,22],[60,372,20],[104,420,16]]){
+    g.fillStyle='rgba(0,0,0,.3)';g.beginPath();g.arc(x+5,y+6,r,0,TAU);g.fill();
+    g.fillStyle='#35592f';g.beginPath();g.arc(x,y,r,0,TAU);g.fill();
+    g.fillStyle='rgba(255,255,255,.07)';g.beginPath();g.arc(x-r*.3,y-r*.3,r*.55,0,TAU);g.fill();
+  }
+  // sàn bê tông
+  const fl=g.createLinearGradient(0,32,0,490);fl.addColorStop(0,'#808a96');fl.addColorStop(.5,'#6b7480');fl.addColorStop(1,'#808a96');
+  g.fillStyle=fl;g.fillRect(GX0,32,GX1-GX0,458);
+  g.strokeStyle='rgba(0,0,0,.12)';g.lineWidth=1.2;g.beginPath();
+  for(let x=GX0;x<=GX1;x+=BAY_W/2){g.moveTo(x,32);g.lineTo(x,490);}
+  for(let y=32;y<=490;y+=57.25){g.moveTo(GX0,y);g.lineTo(GX1,y);}
+  g.stroke();
+  let sd=7;const rn=()=>{sd=(sd*9301+49297)%233280;return sd/233280;};
+  for(let i=0;i<22;i++){g.fillStyle='rgba(20,20,26,'+(.05+rn()*.07)+')';g.beginPath();
+    g.ellipse(GX0+rn()*(GX1-GX0),50+rn()*430,10+rn()*26,6+rn()*14,rn()*3,0,TAU);g.fill();}
+  // lối đi ở giữa + mũi tên chỉ hướng vào
+  g.fillStyle='rgba(0,0,0,.13)';g.fillRect(GX0,214,GX1-GX0,92);
+  g.strokeStyle='rgba(255,255,255,.55)';g.lineWidth=4;g.lineCap='round';g.lineJoin='round';
+  for(let x=200;x<GX1-40;x+=125){g.beginPath();g.moveTo(x,AISLE-12);g.lineTo(x+16,AISLE);g.lineTo(x,AISLE+12);g.stroke();}
+  // vạch chỗ đậu
+  g.strokeStyle='#e5c04a';g.lineWidth=3.5;g.lineCap='butt';g.beginPath();
+  for(let i=0;i<=3;i++){const x=GX0+BAY_W*i;g.moveTo(x,36);g.lineTo(x,214);g.moveTo(x,306);g.lineTo(x,486);}
+  g.stroke();
+  for(const b of BAYS){ // thanh chặn bánh ở cuối chỗ đậu
+    const y=b.top?50:468;
+    for(const s of [-1,1]){g.fillStyle='#1d2126';g.fillRect(b.cx+s*52-14,y-4,28,8);g.fillStyle='#e5c04a';g.fillRect(b.cx+s*52-14,y-4,6,8);g.fillRect(b.cx+s*52,y-4,6,8);}
+  }
+  // tường
+  const wall='#242a31';
+  g.fillStyle=wall;g.fillRect(GX0-14,0,GX1-GX0+44,34);g.fillRect(GX1,0,GW-GX1,GH);g.fillRect(GX0-14,GH-32,GX1-GX0+44,32);
+  g.fillRect(GX0-14,0,16,206);g.fillRect(GX0-14,314,16,GH-314);
+  const eave=g.createLinearGradient(0,0,0,14);eave.addColorStop(0,'#59636d');eave.addColorStop(1,'#39414a');
+  g.fillStyle=eave;g.fillRect(GX0-14,0,GX1-GX0+44,14);g.fillRect(GX0-14,GH-14,GX1-GX0+44,14);
+  const eR=g.createLinearGradient(GX1,0,GW,0);eR.addColorStop(0,'#3a424b');eR.addColorStop(1,'#59636d');g.fillStyle=eR;g.fillRect(GX1,0,GW-GX1,GH);
+  // bóng đổ của tường lên sàn
+  let sh=g.createLinearGradient(0,34,0,74);sh.addColorStop(0,'rgba(0,0,0,.42)');sh.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=sh;g.fillRect(GX0,34,GX1-GX0,40);
+  sh=g.createLinearGradient(0,GH-32,0,GH-72);sh.addColorStop(0,'rgba(0,0,0,.42)');sh.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=sh;g.fillRect(GX0,GH-72,GX1-GX0,40);
+  sh=g.createLinearGradient(GX1,0,GX1-40,0);sh.addColorStop(0,'rgba(0,0,0,.42)');sh.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=sh;g.fillRect(GX1-40,34,40,GH-66);
+  // cửa cuốn: khung vạch vàng đen hai bên cửa và trục cuốn
+  for(const y0 of [198,314]){for(let i=0;i<8;i++){g.fillStyle=i%2?'#14171b':'#e5c04a';g.fillRect(GX0-14+i*2,y0,2,8);}
+    g.fillStyle='#e5c04a';g.fillRect(GX0-14,y0,16,3);}
+  const drum=g.createLinearGradient(GX0-12,0,GX0,0);drum.addColorStop(0,'#9aa3ad');drum.addColorStop(.5,'#d3d9de');drum.addColorStop(1,'#7c858f');
+  g.fillStyle=drum;g.fillRect(GX0-12,206,11,108);
+  g.strokeStyle='rgba(0,0,0,.35)';g.lineWidth=1;g.beginPath();for(let y=210;y<314;y+=6){g.moveTo(GX0-12,y);g.lineTo(GX0-1,y);}g.stroke();
+  // ánh sáng đèn ngoài cửa
+  const gl=g.createRadialGradient(GX0,AISLE,4,GX0,AISLE,120);gl.addColorStop(0,'rgba(255,236,170,.22)');gl.addColorStop(1,'rgba(255,236,170,0)');
+  g.fillStyle=gl;g.fillRect(0,140,GX0+120,240);
+  // biển hiệu trên mái hiên
+  g.fillStyle='#10151a';g.fillRect(GX0+250,3,230,22);g.strokeStyle='#e5c04a';g.lineWidth=1.5;g.strokeRect(GX0+250,3,230,22);
+  g.fillStyle='#ffd36b';g.font='800 15px "Segoe UI",system-ui,sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText('GARA SĂN BÃO',GX0+365,15);
+  g.fillStyle='#8d97a2';for(let x=GX0+10;x<GX1;x+=70){g.fillRect(x,GH-9,22,4);}
+  return off;
+}
+
+function gSize(){
+  const cw=gcv.clientWidth;if(!cw)return false;
+  const d=Math.min(2,window.devicePixelRatio||1),w=Math.round(cw*d);
+  if(w!==gW){gW=w;gcv.width=w;gcv.height=Math.round(w*GH/GW);gBG=renderGBG();}
+  return true;
+}
+function rrect(g,x,y,w,h,r){g.beginPath();if(g.roundRect)g.roundRect(x,y,w,h,r);else g.rect(x,y,w,h);}
+function drawGarage(){
+  if(!gSize())return;
+  const g=gctx;g.setTransform(1,0,0,1,0,0);g.drawImage(gBG,0,0);
+  const k=gW/GW;g.setTransform(k,0,0,k,0,0);
+  g.textAlign='center';g.textBaseline='middle';
+  const u=Math.max(1,Math.min(1.7,560/gcv.clientWidth));      // chữ to lên khi màn hình nhỏ
+  // chỗ trống / chưa mua / đèn chiếu
+  for(const b of BAYS){
+    const own=owns(b.id);
+    const pool=g.createRadialGradient(b.cx,b.cy,10,b.cx,b.cy,150);
+    pool.addColorStop(0,'rgba(255,244,214,'+(own?.32:.05)+')');pool.addColorStop(1,'rgba(255,244,214,0)');
+    g.fillStyle=pool;g.fillRect(b.x,b.y-4,b.w,b.h+8);
+    if(!own){
+      g.fillStyle='rgba(6,8,12,.38)';g.fillRect(b.x+2,b.y,b.w-4,b.h);
+      const pe=poseAt(b.id,1);drawCarSprite(g,b.id,pe.x,pe.y,pe.hd,true,.5);
+      g.font=(34*u)+'px "Segoe UI Emoji","Apple Color Emoji",sans-serif';g.fillStyle='rgba(255,255,255,.9)';g.fillText('🔒',b.cx,b.cy-6);
+    }
+  }
+  // biển tên dưới sàn, ngay trước mỗi chỗ đậu
+  for(const b of BAYS){
+    const own=owns(b.id),ph=22*u,py=b.top?218-ph:290,play=sel.veh===b.id&&own;
+    const txt=own?SHORT[b.id]:(PRICE[b.id]+' xu');
+    g.font='800 '+(12*u)+'px "Segoe UI",system-ui,sans-serif';
+    const w=Math.max(70*u,g.measureText(txt).width+26*u);
+    g.fillStyle='rgba(10,14,19,.86)';rrect(g,b.cx-w/2,py,w,ph,7);g.fill();
+    g.strokeStyle=play?'#ffb23e':own?'rgba(255,255,255,.25)':'#6b5521';g.lineWidth=play?2:1.2;g.stroke();
+    g.fillStyle=own?(play?'#ffc766':'#e8eef4'):'#ffd36b';g.fillText(txt,b.cx,py+ph/2+.5);
+  }
+  // xe đã có: đứng đậu hoặc đang chạy
+  for(const id of BAY_ORDER){
+    const c=gcars[id];if(!owns(id)||!c)continue;
+    if(c.p<=0&&c.delay>0)continue;
+    const pe=poseAt(id,c.p);
+    if(pe.moving){ // đèn pha quét phía trước khi xe đang chạy
+      const {L}=carSize(id),hx=Math.cos(pe.hd),hy=Math.sin(pe.hd);
+      const fx=pe.x+hx*L*.5,fy=pe.y+hy*L*.5,gr=g.createLinearGradient(fx,fy,fx+hx*150,fy+hy*150);
+      gr.addColorStop(0,'rgba(255,244,190,.4)');gr.addColorStop(1,'rgba(255,244,190,0)');
+      g.fillStyle=gr;g.beginPath();g.moveTo(fx-hy*10,fy+hx*10);g.lineTo(fx+hx*150-hy*52,fy+hy*150+hx*52);
+      g.lineTo(fx+hx*150+hy*52,fy+hy*150-hx*52);g.lineTo(fx+hy*10,fy-hx*10);g.closePath();g.fill();
+    }
+    drawCarSprite(g,id,pe.x,pe.y,pe.hd,false,1);
+  }
+  // khung chọn / rê chuột / xe đang dùng
+  for(const b of BAYS){
+    const own=owns(b.id),play=sel.veh===b.id&&own;
+    if(b.id!==view&&b.id!==gHover&&!play)continue;
+    g.lineWidth=b.id===view?4:2.5;
+    g.strokeStyle=b.id===view?'#6fb3ff':play?'#ffb23e':'rgba(255,255,255,.55)';
+    rrect(g,b.x+4,b.y+(b.top?0:2),b.w-8,b.h-2,10);g.stroke();
+    if(play){const bw=88*u,bh=18*u,by=b.y+(b.top?4:b.h-bh-4);g.fillStyle='#ffb23e';rrect(g,b.cx-bw/2,by,bw,bh,bh/2);g.fill();
+      g.fillStyle='#1b1305';g.font='800 '+(10*u)+'px "Segoe UI",system-ui,sans-serif';g.fillText('ĐANG DÙNG',b.cx,by+bh/2+.5);}
+  }
+}
+function gstep(dt){
+  for(const id in gcars){
+    const c=gcars[id];if(!c.run)continue;
+    if(c.delay>0){c.delay-=dt;if(c.delay>0)continue;if(c.dir>0&&!c.sound){c.sound=true;sfx(95+Math.random()*20,.5,'sawtooth',.05,1.7);}}
+    c.p+=c.dir*dt/(c.dur||1);
+    if(c.dir>0&&c.p>=1){c.p=1;c.run=0;sfx(70,.12,'square',.08,.6);}
+    else if(c.dir<0&&c.p<=0){c.p=0;c.run=0;}
+  }
+}
+function gloop(now){
+  requestAnimationFrame(gloop);
+  const dt=Math.min(.05,Math.max(0,(now-glast)/1000));glast=now;
+  if($('menu').style.display==='none')return;
+  gstep(dt);drawGarage();
+}
+requestAnimationFrame(gloop);
+function gbayAt(e){
+  const r=gcv.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*GW,y=(e.clientY-r.top)/r.height*GH;
+  return BAYS.find(b=>x>=b.x&&x<=b.x+b.w&&y>=b.y&&y<=b.y+b.h)||null;
+}
+gcv.addEventListener('pointermove',e=>{const b=gbayAt(e);gHover=b?b.id:null;});
+gcv.addEventListener('pointerleave',()=>{gHover=null;});
+gcv.addEventListener('click',e=>{const b=gbayAt(e);if(b){view=b.id;sure=null;renderGarage();}});
 function buildMenu(){
   $('levels').innerHTML=LEVELS.map((l,i)=>
     '<button class="lv" data-i="'+i+'"><b>'+l.ef+'</b><small>'+l.name+'<br>Gió đỉnh khoảng '+l.v+' km/h</small></button>').join('');
@@ -1175,12 +1390,17 @@ function refreshMenu(){
     b.classList.toggle('lock',i>=save.unlocked);b.classList.toggle('sel',i===sel.lv);});
   $('bestline').textContent=save.best?('Điểm cao nhất: '+save.best):'';
 }
-$('start').onclick=()=>startGame(sel.veh,sel.lv);
+$('start').onclick=()=>{
+  if(starting)return;starting=true;initAudio();
+  const c=gcars[sel.veh];let wait=0;
+  if(c&&c.p>=.99){c.dir=-1;c.run=1;c.delay=0;c.dur=.85;wait=900;sfx(100,.8,'sawtooth',.1,2);}   // xe lùi ra khỏi gara rồi mới vào ván
+  setTimeout(()=>{starting=false;startGame(sel.veh,sel.lv);},wait);
+};
 $('unlockAll').onclick=()=>{save.unlocked=LEVELS.length;writeSave();refreshMenu();};
 $('cheatCoins').onclick=()=>{save.coins+=1000;writeSave();refreshMenu();};
 buildMenu();refreshMenu();
 $('start').disabled=true;$('start').textContent='Đang tải ảnh...';
-const imgsReady=loadImages().then(()=>{imgsDone=true;$('start').disabled=false;refreshMenu();});
+const imgsReady=loadImages().then(()=>{imgsDone=true;$('start').disabled=false;refreshMenu();parkAll(true);});
 
 // cho kiểm thử
 window.__game={imgsReady,get G(){return G;},startGame,update,windAt,LEVELS,VEHICLES,sel,save,get keys(){return keys;}};

@@ -27,6 +27,42 @@ button{font:inherit;color:inherit;cursor:pointer}
 .card .swatch{top:22px;right:22px}
 h1{text-shadow:0 2px 18px rgba(0,0,0,.7)}
 #start:disabled{opacity:.5;cursor:wait}
+
+/* ---------- gara trưng bày ---------- */
+.coins{margin-left:10px;background:#2b2412;border:1px solid #6b5521;color:#ffd36b;border-radius:20px;padding:3px 12px;font-size:13px;letter-spacing:.02em;text-transform:none;font-weight:700}
+#garage{background:linear-gradient(#141c25,#10171e);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.hero{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:0;position:relative}
+@media(max-width:760px){.hero{grid-template-columns:1fr}}
+.stage{position:relative;background:radial-gradient(ellipse at 50% 85%,#3a4654 0,#1b232d 55%,#10171e 100%);min-height:260px}
+.stage img{width:100%;height:100%;object-fit:cover;display:block;aspect-ratio:4/3}
+.stage.locked img{filter:grayscale(1) brightness(.35) contrast(1.1)}
+.stage .badge{position:absolute;left:14px;top:14px;background:rgba(10,14,19,.8);border:1px solid rgba(255,255,255,.18);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:700}
+.stage .badge.own{color:var(--green);border-color:#2f7a52}
+.stage .badge.lock{color:#ffd36b;border-color:#6b5521}
+.stage .padlock{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:64px;opacity:.75}
+.info{padding:18px 20px 20px;display:flex;flex-direction:column}
+.info .nm{font-size:26px;font-weight:800;line-height:1.1}
+.info .sb{font-size:13px;color:var(--dim);margin:3px 0 12px}
+.info .fact{margin:8px 0 14px}
+.info .act{margin-top:auto;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn.sm{padding:11px 22px;font-size:15px}
+.btn.buy{background:#ffd36b}
+.btn.off{background:#2a3440;color:#7d8c9b;cursor:not-allowed}
+.btn.sure{background:#ff9a3c}
+.act .hint2{font-size:12px;color:var(--dim)}
+.shelf{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;padding:12px;border-top:1px solid var(--line);background:#0e151c}
+@media(max-width:760px){.shelf{grid-template-columns:repeat(3,1fr)}}
+.slot{position:relative;background:var(--panel);border:2px solid var(--line);border-radius:10px;padding:0 0 6px;overflow:hidden;text-align:center;transition:.15s}
+.slot:hover{border-color:#44607c}
+.slot img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
+.slot.locked img{filter:grayscale(1) brightness(.35)}
+.slot .nm2{font-size:11.5px;font-weight:700;margin-top:5px;padding:0 4px;line-height:1.2;min-height:28px;display:flex;align-items:center;justify-content:center}
+.slot .st2{font-size:10.5px;color:var(--dim)}
+.slot.locked .st2{color:#ffd36b}
+.slot .lk{position:absolute;left:0;right:0;top:0;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;font-size:26px;opacity:.8}
+.slot.view{border-color:#6fb3ff}
+.slot.play{border-color:var(--amber);box-shadow:0 0 0 2px rgba(255,178,62,.2)}
+.slot .tick{position:absolute;right:5px;top:5px;background:var(--amber);color:#1b1305;border-radius:10px;font-size:10px;font-weight:800;padding:1px 6px}
 h1{font-size:clamp(34px,6vw,58px);letter-spacing:.02em;font-weight:800;line-height:1}
 h1 span{color:var(--amber)}
 .tag{color:var(--dim);margin-top:8px;font-size:16px;max-width:640px;line-height:1.5}
@@ -172,10 +208,13 @@ kbd{background:#0d151d;border:1px solid var(--line);border-bottom-width:2px;bord
   <h1>SĂN <span>BÃO</span></h1>
   <p class="tag">Lái những chiếc xe bọc thép chuyên đón đầu lốc xoáy. Đến gần cơn bão, ghim xe xuống đất, ghi lại dữ liệu và sống sót khi gió quật tới.</p>
 
-  <h2>1 · Chọn xe</h2>
-  <div class="cards" id="cards"></div>
+  <h2>1 · Gara của bạn <span class="coins" id="coins"></span></h2>
+  <div id="garage">
+    <div class="hero" id="hero"></div>
+    <div class="shelf" id="shelf"></div>
+  </div>
 
-  <h2>2 · Chọn mùa bão <button class="linkbtn" id="unlockAll">mở khóa tất cả</button></h2>
+  <h2>2 · Chọn mùa bão <button class="linkbtn" id="unlockAll">mở khóa tất cả mùa</button><button class="linkbtn" id="cheatCoins">+1000 xu (chơi thử)</button></h2>
   <div class="levels" id="levels"></div>
 
   <div class="go">
@@ -278,6 +317,9 @@ const VEHICLES=[
   fact:'Xe tải gắn radar Doppler để quét cấu trúc cơn bão từ xa. Không bọc giáp hạng nặng và không lao vào lốc như dòng TIV.'}
 ];
 
+/* ---------- Giá xe trong gara (xu) ---------- */
+const PRICE={tiv1:0,tiv3:450,dow:700,arma:1100,tiv2:1600,dom3:2600};
+
 /* ---------- Mùa bão ---------- */
 const LEVELS=[
  {ef:'EF1',name:'Đồng cỏ mở màn',v:165,target:60, life:110,rc:70, spd:38,dark:.10},
@@ -297,8 +339,11 @@ const FACTS=[
 
 /* ---------- Lưu tiến độ ---------- */
 const SAVE_KEY='stormchase.v1';
-let save={unlocked:1,best:0};
+let save={unlocked:1,best:0,coins:0,owned:['tiv1']};
 try{const s=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');if(s&&typeof s.unlocked==='number')save=Object.assign(save,s);}catch(e){}
+if(!Array.isArray(save.owned))save.owned=['tiv1'];
+if(save.owned.indexOf('tiv1')<0)save.owned.unshift('tiv1');
+if(typeof save.coins!=='number'||!(save.coins>=0))save.coins=0;
 function writeSave(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(save));}catch(e){}}
 
 /* =========================================================
@@ -506,7 +551,7 @@ function togglePause(force){
 }
 function toMenu(){
   G=null;paused=false;$('hud').style.display='none';$('touch').style.display='none';$('ov').style.display='none';
-  $('menu').style.display='block';if(AC)audioTick(0,0,false);refreshMenu();
+  $('menu').style.display='block';if(AC)audioTick(0,0,false);view=sel.veh;sure=null;refreshMenu();
 }
 let toastTimer=0;
 function toast(t,warn){
@@ -717,6 +762,12 @@ function hud(V,rating){
 /* =========================================================
    Kết thúc
    ========================================================= */
+// gợi ý trong bảng kết quả: đủ xu mua xe nào chưa có thì báo
+function newCarHint(){
+  const can=VEHICLES.filter(v=>!owns(v.id)&&save.coins>=(PRICE[v.id]||0));
+  if(!can.length)return '';
+  return '<div class="did" style="border:1px solid #6b5521;background:#2b2412;color:#ffe3a1">Bạn đủ xu để mua: <b>'+can.map(v=>v.name).join(', ')+'</b>. Về gara để xem.</div>';
+}
 function endGame(win,msg){
   const g=G;if(g.over)return;g.over=true;
   if(AC)audioTick(0,0,false);
@@ -724,11 +775,15 @@ function endGame(win,msg){
   let score=0;
   if(win)score=Math.round((g.data*10+hpPct*5+timeLeft*5)*(1+.5*g.lvIdx));
   const newBest=win&&score>save.best;
+  // xu thưởng: theo phần dữ liệu thu được (mùa càng khó càng nhiều), thua chỉ được một nửa, thắng cộng thêm theo điểm
+  const base=Math.round(g.data/g.L.target*100*(1+.5*g.lvIdx));
+  const coins=win?base+Math.round(score/25):Math.round(base*.5);
+  save.coins+=coins;
   if(win){
     if(newBest)save.best=score;
     if(g.lvIdx+1<LEVELS.length&&save.unlocked<g.lvIdx+2)save.unlocked=g.lvIdx+2;
-    writeSave();
   }
+  writeSave();
   sfx(win?520:110,win?.5:.8,win?'triangle':'sawtooth',.2,win?1.6:.4);
   setTimeout(()=>{
     $('hint').style.opacity=0;
@@ -743,7 +798,9 @@ function endGame(win,msg){
       '<tr><td>Thân xe còn lại</td><td>'+hpPct+'%</td></tr>'+
       '<tr><td>Gió mạnh nhất xe từng chịu</td><td>'+Math.round(g.maxWind)+' km/h ('+efName(g.maxWind)+')</td></tr>'+
       (win?'<tr><td>Điểm</td><td>'+score+(newBest?' · kỷ lục mới':'')+'</td></tr>':'')+
+      '<tr><td>Xu thưởng</td><td>🪙 +'+coins+' (đang có '+save.coins+')</td></tr>'+
       '</table>'+
+      newCarHint()+
       '<div class="did"><b>Bạn có biết?</b> '+pick(FACTS)+'</div>'+
       '<div class="btns">'+
       (next?'<button class="btn" id="bn">Mùa kế tiếp</button>':'')+
@@ -1058,34 +1115,72 @@ requestAnimationFrame(frame);
 /* =========================================================
    Menu
    ========================================================= */
-const sel={veh:'tiv2',lv:0};
+const sel={veh:'tiv1',lv:0};
+let view='tiv1',sure=null,sureTimer=0,imgsDone=false;      // view = xe đang trưng bày; sure = xe đang chờ bấm lần hai để mua
 function bar(cls,pct){return '<div class="bar '+cls+'"><i style="width:'+clamp(pct,4,100)+'%"></i></div>';}
-function buildMenu(){
-  $('cards').innerHTML=VEHICLES.map(v=>
-    '<button class="card" data-id="'+v.id+'"><img class="cimg" src="img/card_'+v.id+'.jpg" alt="" onerror="this.style.display=\'none\'"><div class="swatch" style="background:'+v.color+'"></div>'+
-    '<div class="nm">'+v.name+'</div><div class="sb">'+v.sub+'</div>'+
+const owns=id=>save.owned.indexOf(id)>=0;
+const imgErr=' onerror="this.style.display=\'none\'"';
+function renderGarage(){
+  const v=VEHICLES.find(x=>x.id===view),own=owns(v.id),price=PRICE[v.id]||0,need=price-save.coins;
+  let act;
+  if(own)act=sel.veh===v.id
+    ?'<button class="btn sm off" disabled>Đang dùng</button><span class="hint2">Bấm Xuất phát ở dưới để chơi</span>'
+    :'<button class="btn sm" id="useBtn">Chọn xe này</button>';
+  else if(need>0)act='<button class="btn sm off" disabled>Cần thêm '+need+' xu</button><span class="hint2">Chơi các mùa bão để kiếm xu</span>';
+  else act=sure===v.id
+    ?'<button class="btn sm sure" id="buyBtn">Bấm lần nữa để mua</button><span class="hint2">'+price+' xu</span>'
+    :'<button class="btn sm buy" id="buyBtn">Mua · '+price+' xu</button>';
+  $('hero').innerHTML=
+    '<div class="stage'+(own?'':' locked')+'"><img src="img/card_'+v.id+'.jpg" alt=""'+imgErr+'>'+
+    (own?'<span class="badge own">Đã có trong gara</span>':'<span class="badge lock">Chưa sở hữu · '+price+' xu</span><div class="padlock">🔒</div>')+'</div>'+
+    '<div class="info"><div class="nm">'+v.name+'</div><div class="sb">'+v.sub+'</div>'+
     '<div class="st"><span>Tốc độ</span>'+bar('',v.speed/265*100)+
     '<span>Giáp</span>'+bar('',v.armor/.45*100)+
     '<span>Gió (thường)</span>'+bar('a',v.rU/260*100)+
     '<span>Gió (ghim)</span>'+bar('a',v.canDeploy?v.rD/420*100:v.rU/420*100)+
     '<span>Ghi dữ liệu</span>'+bar('g',v.data/1.25*100)+'</div>'+
-    '<div class="trait">'+v.trait+'</div><div class="fact">'+v.fact+'</div></button>').join('');
-  $('cards').querySelectorAll('.card').forEach(c=>c.onclick=()=>{sel.veh=c.dataset.id;refreshMenu();});
+    '<div class="trait">'+v.trait+'</div><div class="fact">'+v.fact+'</div>'+
+    '<div class="act">'+act+'</div></div>';
+  const ub=$('useBtn');if(ub)ub.onclick=()=>{sel.veh=v.id;refreshMenu();};
+  const bb=$('buyBtn');if(bb)bb.onclick=()=>buyVehicle(v.id);
+  $('shelf').innerHTML=VEHICLES.map(x=>{
+    const o=owns(x.id);
+    return '<button class="slot'+(o?'':' locked')+(x.id===view?' view':'')+(x.id===sel.veh?' play':'')+'" data-id="'+x.id+'">'+
+      '<img src="img/card_'+x.id+'.jpg" alt=""'+imgErr+'>'+(o?'':'<div class="lk">🔒</div>')+(x.id===sel.veh?'<span class="tick">ĐANG DÙNG</span>':'')+
+      '<div class="nm2">'+x.name+'</div><div class="st2">'+(o?'Đã có':(PRICE[x.id]+' xu'))+'</div></button>';
+  }).join('');
+  $('shelf').querySelectorAll('.slot').forEach(s=>s.onclick=()=>{view=s.dataset.id;sure=null;renderGarage();});
+  const n=save.owned.length;
+  $('coins').textContent='🪙 '+save.coins+' xu · '+n+'/'+VEHICLES.length+' xe';
+}
+function buyVehicle(id){
+  const price=PRICE[id]||0;
+  if(owns(id)||save.coins<price)return;
+  if(sure!==id){sure=id;clearTimeout(sureTimer);sureTimer=setTimeout(()=>{sure=null;renderGarage();},3500);renderGarage();return;}
+  clearTimeout(sureTimer);sure=null;
+  save.coins-=price;save.owned.push(id);sel.veh=id;writeSave();
+  if(AC&&!muted)sfx(660,.35,'triangle',.2,1.5);
+  refreshMenu();
+}
+function buildMenu(){
   $('levels').innerHTML=LEVELS.map((l,i)=>
     '<button class="lv" data-i="'+i+'"><b>'+l.ef+'</b><small>'+l.name+'<br>Gió đỉnh khoảng '+l.v+' km/h</small></button>').join('');
   $('levels').querySelectorAll('.lv').forEach(b=>b.onclick=()=>{const i=+b.dataset.i;if(i<save.unlocked){sel.lv=i;refreshMenu();}});
 }
 function refreshMenu(){
-  $('cards').querySelectorAll('.card').forEach(c=>c.classList.toggle('sel',c.dataset.id===sel.veh));
+  if(!owns(sel.veh))sel.veh='tiv1';
+  renderGarage();
+  if(imgsDone){const v=VEHICLES.find(x=>x.id===sel.veh);$('start').textContent='Xuất phát với '+v.name;}
   $('levels').querySelectorAll('.lv').forEach(b=>{const i=+b.dataset.i;
     b.classList.toggle('lock',i>=save.unlocked);b.classList.toggle('sel',i===sel.lv);});
   $('bestline').textContent=save.best?('Điểm cao nhất: '+save.best):'';
 }
 $('start').onclick=()=>startGame(sel.veh,sel.lv);
 $('unlockAll').onclick=()=>{save.unlocked=LEVELS.length;writeSave();refreshMenu();};
+$('cheatCoins').onclick=()=>{save.coins+=1000;writeSave();refreshMenu();};
 buildMenu();refreshMenu();
 $('start').disabled=true;$('start').textContent='Đang tải ảnh...';
-const imgsReady=loadImages().then(()=>{$('start').disabled=false;$('start').textContent='Xuất phát';});
+const imgsReady=loadImages().then(()=>{imgsDone=true;$('start').disabled=false;refreshMenu();});
 
 // cho kiểm thử
 window.__game={imgsReady,get G(){return G;},startGame,update,windAt,LEVELS,VEHICLES,sel,save,get keys(){return keys;}};

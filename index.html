@@ -78,6 +78,8 @@ h1{text-shadow:0 2px 18px rgba(0,0,0,.7)}
 .slot .tick{position:absolute;right:5px;top:5px;background:var(--amber);color:#1b1305;border-radius:10px;font-size:10px;font-weight:800;padding:1px 6px}
 h1{font-size:clamp(34px,6vw,58px);letter-spacing:.02em;font-weight:800;line-height:1}
 h1 span{color:var(--amber)}
+.en{font-size:15px;letter-spacing:.42em;color:var(--dim);font-weight:700;margin-top:6px;text-shadow:0 2px 10px rgba(0,0,0,.7)}
+.sm2{display:block;font-size:9px;opacity:.75;line-height:1;margin-top:1px;letter-spacing:.04em;text-transform:uppercase;font-weight:600}
 .tag{color:var(--dim);margin-top:8px;font-size:16px;max-width:640px;line-height:1.5}
 h2{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin:30px 0 12px;font-weight:700}
 .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
@@ -165,7 +167,7 @@ kbd{background:#0d151d;border:1px solid var(--line);border-bottom-width:2px;bord
 #tL{left:16px;bottom:84px}#tR{left:100px;bottom:84px}#tU{right:100px;bottom:112px}#tD{right:100px;bottom:28px}
 #tA{right:14px;bottom:56px;width:98px;height:98px;background:rgba(255,178,62,.34);border-color:rgba(255,178,62,.9);font-size:17px;font-weight:800;line-height:1.1;text-align:center;box-shadow:0 0 0 4px rgba(255,178,62,.18)}
 #tA.act{background:rgba(255,178,62,.85);color:#1b1305}
-#tA{white-space:pre-line}
+#tA{flex-direction:column;gap:3px}#tA .sm2{font-size:10px;letter-spacing:.06em}
 #tU{right:124px;bottom:128px}#tD{right:124px;bottom:42px}
 #tL{bottom:70px}#tR{bottom:70px}
 body.touch #hw{bottom:190px}
@@ -191,11 +193,11 @@ body.touch #hint{bottom:34%}
 <div id="hud">
   <div id="hl" class="pill">
     <div class="t" id="vname">TIV 2</div>
-    <div class="row"><label>Thân xe</label><div class="bar" id="hp"><i style="width:100%"></i></div></div>
-    <div class="row"><label>Ghim xe</label><div class="bar a" id="an"><i style="width:0"></i></div></div>
+    <div class="row"><label>Thân xe<span class="sm2">Hull</span></label><div class="bar" id="hp"><i style="width:100%"></i></div></div>
+    <div class="row"><label>Ghim xe<span class="sm2">Anchor</span></label><div class="bar a" id="an"><i style="width:0"></i></div></div>
   </div>
   <div id="hc" class="pill">
-    <div class="t">Dữ liệu cơn bão <b id="dtxt">0%</b></div>
+    <div class="t">Dữ liệu cơn bão <span style="opacity:.7;font-size:.8em">· Storm data</span> <b id="dtxt">0%</b></div>
     <div class="bar g" id="dt"><i style="width:0"></i></div>
   </div>
   <div id="hr" class="pill">
@@ -225,9 +227,10 @@ body.touch #hint{bottom:34%}
 
 <div id="menu"><div class="wrap">
   <h1>SĂN <span>BÃO</span></h1>
+  <div class="en">STORM CHASE</div>
   <p class="tag">Lái những chiếc xe bọc thép chuyên đón đầu lốc xoáy. Đến gần cơn bão, ghim xe xuống đất, ghi lại dữ liệu và sống sót khi gió quật tới.</p>
 
-  <h2>1 · Gara của bạn <span class="coins" id="coins"></span></h2>
+  <h2>1 · Gara · Garage <span class="coins" id="coins"></span></h2>
   <div id="garage">
     <div class="hero">
       <div class="gscene"><canvas id="gcv"></canvas><div class="gcap">Bấm vào chỗ đậu để xem xe</div></div>
@@ -241,7 +244,7 @@ body.touch #hint{bottom:34%}
     <span id="codeMsg"></span>
   </div>
 
-  <h2>2 · Chọn mùa bão <button class="linkbtn" id="unlockAll">mở khóa tất cả mùa</button><button class="linkbtn" id="cheatCoins">+1000 xu (chơi thử)</button></h2>
+  <h2>2 · Chọn mùa bão · Storm season <button class="linkbtn" id="unlockAll">mở khóa tất cả mùa</button><button class="linkbtn" id="cheatCoins">+1000 xu (chơi thử)</button></h2>
   <div class="levels" id="levels"></div>
 
   <div class="go">
@@ -349,11 +352,11 @@ const PRICE={tiv1:0,tiv3:450,dow:700,arma:1100,tiv2:1600,dom3:2600};
 
 /* ---------- Mùa bão ---------- */
 const LEVELS=[
- {ef:'EF1',name:'Đồng cỏ mở màn',v:165,target:60, life:110,rc:70, spd:38,dark:.10},
- {ef:'EF2',name:'Thị trấn nhỏ',   v:205,target:80, life:105,rc:80, spd:42,dark:.14},
- {ef:'EF3',name:'Hành lang lốc xoáy',v:255,target:100,life:100,rc:92, spd:46,dark:.18},
- {ef:'EF4',name:'Đêm giông',      v:305,target:120,life:95, rc:104,spd:50,dark:.26},
- {ef:'EF5',name:'Quái vật',       v:365,target:150,life:95, rc:118,spd:54,dark:.32}
+ {ef:'EF1',name:'Đồng cỏ mở màn',en:'Open Fields',v:165,target:60, life:110,rc:70, spd:38,dark:.10},
+ {ef:'EF2',name:'Thị trấn nhỏ',en:'Small Town',   v:205,target:80, life:105,rc:80, spd:42,dark:.14},
+ {ef:'EF3',name:'Hành lang lốc xoáy',en:'Tornado Alley',v:255,target:100,life:100,rc:92, spd:46,dark:.18},
+ {ef:'EF4',name:'Đêm giông',en:'Night Storm',      v:305,target:120,life:95, rc:104,spd:50,dark:.26},
+ {ef:'EF5',name:'Quái vật',en:'The Monster',       v:365,target:150,life:95, rc:118,spd:54,dark:.32}
 ];
 
 const FACTS=[
@@ -523,7 +526,7 @@ function startGame(vehId,lvIdx){
   $('lvl').textContent='Lốc '+L.ef+' · '+L.name;
   $('hint').style.opacity=1;
   $('hint').innerHTML=def.canDeploy
-    ? '<b>Cách chơi:</b> chạy tới gần cơn lốc, giữ khoảng cách vừa đủ rồi nhấn '+(isTouch?'nút cam <b>GHIM</b> ở góc phải dưới':'<b>SPACE (GHIM)</b>')+'. Xe ghim xong mới ghi được dữ liệu. Đừng ghim sát thành lốc nếu gió vượt sức chịu của xe.'
+    ? '<b>Cách chơi:</b> chạy tới gần cơn lốc, giữ khoảng cách vừa đủ rồi nhấn '+(isTouch?'nút cam <b>GHIM</b> ở góc phải dưới':'<b>SPACE (GHIM / Anchor)</b>')+'. Xe ghim xong mới ghi được dữ liệu. Đừng ghim sát thành lốc nếu gió vượt sức chịu của xe.'
     : '<b>Cách chơi:</b> xe radar ghi dữ liệu từ xa, không cần ghim. Chạy vào tầm quét nhưng tránh vùng gió mạnh hơn 150 km/h.';
   $('menu').style.display='none';$('ov').style.display='none';
   $('hud').style.display='block';
@@ -642,8 +645,11 @@ function update(dt){
   // ghim
   if(def.canDeploy){
     const rate=1/def.deploy;
+    const was=P.dep;
     P.dep=clamp(P.dep+(P.depWant?rate:-rate*1.4)*dt,0,1);
+    if(was<.97&&P.dep>=.97){P.dustT=.9;P.shake=Math.max(P.shake,2.2);} // chân chạm đất: bụi và rung nhẹ
   }
+  if(P.dustT>0)P.dustT=Math.max(0,P.dustT-dt);
   const free=1-P.dep;
   const road=onRoad(P.x,P.y);
   const vmax=def.speed*(road?1.12:.85);
@@ -774,7 +780,7 @@ function hud(V,rating){
   $('hp').firstElementChild.style.width=hpPct+'%';
   $('hp').className='bar'+(hpPct>55?' ok':'');
   $('an').firstElementChild.style.width=(def.canDeploy?P.dep*100:0)+'%';
-  if(isTouch){const ta=$('tA');ta.classList.toggle('act',!!P.depWant);ta.textContent=!def.canDeploy?'RADAR':P.dep>=.95?'NHẢ XE':P.depWant?'ĐANG\nGHIM':'GHIM XE';}
+  if(isTouch){const ta=$('tA');ta.classList.toggle('act',!!P.depWant);ta.innerHTML=!def.canDeploy?'RADAR<span class="sm2">Radar truck</span>':P.dep>=.95?'NHẢ XE<span class="sm2">Release</span>':P.depWant?'ĐANG GHIM<span class="sm2">Anchoring…</span>':'GHIM XE<span class="sm2">Anchor</span>';}
   const dp=g.data/L.target*100;
   $('dt').firstElementChild.style.width=dp+'%';$('dtxt').textContent=Math.floor(dp)+'%';
   $('timer').textContent=Math.max(0,Math.ceil(g.T.life-g.T.age))+' s';
@@ -823,7 +829,7 @@ function endGame(win,msg){
       '<div class="sub">'+msg+'</div>'+
       '<table>'+
       '<tr><td>Xe</td><td>'+g.def.name+'</td></tr>'+
-      '<tr><td>Cơn lốc</td><td>'+g.L.ef+' · '+g.L.name+'</td></tr>'+
+      '<tr><td>Cơn lốc</td><td>'+g.L.ef+' · '+g.L.name+' ('+g.L.en+')</td></tr>'+
       '<tr><td>Dữ liệu thu được</td><td>'+Math.floor(g.data/g.L.target*100)+'%</td></tr>'+
       '<tr><td>Thân xe còn lại</td><td>'+hpPct+'%</td></tr>'+
       '<tr><td>Gió mạnh nhất xe từng chịu</td><td>'+Math.round(g.maxWind)+' km/h ('+efName(g.maxWind)+')</td></tr>'+
@@ -1015,6 +1021,63 @@ function drawTornado(T){
   ctx.restore();
 }
 
+function easeIO(p){return p<.5?4*p*p*p:1-Math.pow(-2*p+2,3)/2;}
+function drawGear(P,def,LL,WH2){
+  const p=P.dep;if(!def.canDeploy||p<=.01)return;
+  const e=easeIO(p),t=performance.now()/1000;
+  const spike=def.id==='tiv3'||def.id==='arma';
+  // vết ép xuống đất dưới thân xe
+  ctx.fillStyle='rgba(0,0,0,'+(.30*e)+')';
+  ctx.beginPath();
+  if(ctx.roundRect)ctx.roundRect(-LL/2-5*e,-WH2/2-6*e,LL+10*e,WH2+12*e,9);else ctx.rect(-LL/2-5*e,-WH2/2-6*e,LL+10*e,WH2+12*e);
+  ctx.fill();
+  // tấm chắn hông trượt ra (xe giáp nặng)
+  if(def.id==='tiv2'||def.id==='dom3'||def.id==='arma'){
+    const w=LL*.64,h=2+7*e,x=-w/2;
+    for(const sy of [-1,1]){
+      const y=sy>0?WH2/2-2:-WH2/2+2-h;
+      ctx.fillStyle='#4d555d';ctx.fillRect(x,y,w,h);
+      ctx.fillStyle='#ffc04d';
+      for(let k=0;k<6;k++)ctx.fillRect(x+3+k*(w/6),y+(sy>0?h-2.2:0),w/12,2.2);
+      ctx.strokeStyle='rgba(0,0,0,.6)';ctx.lineWidth=1;ctx.strokeRect(x,y,w,h);
+    }
+  }
+  // bốn chân thủy lực
+  const ext=e*(WH2*.45+18);
+  const pads=[];
+  ctx.lineCap='round';
+  for(const sx of [-1,1])for(const sy of [-1,1]){
+    const bx=sx*LL*.33,by=sy*WH2*.30;
+    const tx=bx+sx*ext*.42,ty=sy*(WH2*.5+ext*.95);
+    const kx=bx+(tx-bx)*.5,ky=by+(ty-by)*.5;
+    ctx.strokeStyle='#23272c';ctx.lineWidth=8;ctx.beginPath();ctx.moveTo(bx,by);ctx.lineTo(kx,ky);ctx.stroke();       // cẩu trên
+    ctx.strokeStyle='#7d868f';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(bx,by);ctx.lineTo(kx,ky);ctx.stroke();
+    ctx.strokeStyle='#b9c1c8';ctx.lineWidth=4.5;ctx.beginPath();ctx.moveTo(kx,ky);ctx.lineTo(tx,ty);ctx.stroke();       // ty thủy lực
+    ctx.fillStyle='#ffc04d';ctx.beginPath();ctx.arc(kx,ky,4,0,TAU);ctx.fill();ctx.strokeStyle='#2b2310';ctx.lineWidth=1;ctx.stroke(); // khớp vàng
+    pads.push([tx,ty,sx,sy]);
+  }
+  for(const [tx,ty,sx,sy] of pads){
+    const r=3+5*e;
+    ctx.fillStyle='rgba(0,0,0,'+(.35*e)+')';ctx.beginPath();ctx.ellipse(tx+1.5,ty+2,r+1,r*.8,0,0,TAU);ctx.fill();
+    if(spike){ // mũi neo cắm xuống đất
+      ctx.strokeStyle='#1f2327';ctx.lineWidth=3;
+      for(let k=0;k<4;k++){const a=k*Math.PI/2+Math.PI/4;ctx.beginPath();ctx.moveTo(tx,ty);ctx.lineTo(tx+Math.cos(a)*r*1.5,ty+Math.sin(a)*r*1.5);ctx.stroke();}
+      ctx.fillStyle='#c9d0d6';ctx.beginPath();ctx.arc(tx,ty,2.8,0,TAU);ctx.fill();
+    }else{ // đế chân tròn
+      ctx.fillStyle='#2a2e33';ctx.beginPath();ctx.arc(tx,ty,r,0,TAU);ctx.fill();
+      ctx.strokeStyle=p>.6?'#ffc04d':'#7d868f';ctx.lineWidth=1.8;ctx.stroke();
+      ctx.fillStyle='#8d959c';ctx.beginPath();ctx.arc(tx,ty,r*.35,0,TAU);ctx.fill();
+    }
+    if(P.dustT>0){ // bụi bốc lên khi chân chạm đất
+      const u=1-P.dustT/.9;
+      for(let k=0;k<3;k++){
+        const a=k*2.1+tx*.3,rr=6+u*20+k*3;
+        ctx.fillStyle='rgba(196,174,132,'+(.34*(1-u))+')';
+        ctx.beginPath();ctx.arc(tx+Math.cos(a)*u*9,ty+Math.sin(a)*u*9,rr,0,TAU);ctx.fill();
+      }
+    }
+  }
+}
 function drawVehicle(P,def,g){
   const L=def.len,Wd=def.wid,p=P.dep;
   const VS=sp('veh_'+def.id);
@@ -1026,22 +1089,16 @@ function drawVehicle(P,def,g){
   ctx.fillStyle=lg;ctx.beginPath();ctx.moveTo(LL/2-2,-WH2*.3);ctx.lineTo(LL/2+190,-WH2*1.6);ctx.lineTo(LL/2+190,WH2*1.6);ctx.lineTo(LL/2-2,WH2*.3);ctx.fill();
   // bóng
   if(!VS){ctx.fillStyle='rgba(0,0,0,.3)';ctx.beginPath();ctx.ellipse(3,5,L*.56,Wd*.62,0,0,TAU);ctx.fill();}
-  // chân ghim
-  if(def.canDeploy&&p>.01){
-    const ext=p*(def.id==='tiv2'?9:13);
-    if(!VS&&(def.id==='tiv2'||def.id==='dom3'||def.id==='arma')){
-      ctx.fillStyle='rgba(25,25,25,'+(.55*p)+')';
-      const e=p*5;ctx.fillRect(-L/2-e,-Wd/2-e,L+e*2,Wd+e*2);
-    }
-    ctx.lineCap='round';
-    for(const sx of [-1,1])for(const sy of [-1,1]){
-      const x=sx*LL*.36,y=sy*WH2*.44,ex=x+sx*ext*.35,ey=y+sy*ext;
-      ctx.strokeStyle='#222';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(ex,ey);ctx.stroke();
-      if(p>.6){ctx.fillStyle='#ffc04d';ctx.beginPath();ctx.arc(ex,ey,2.5+2*p,0,TAU);ctx.fill();}
-    }
-  }
+  // bộ ghim: tấm chắn hông trượt ra, chân thủy lực duỗi xuống đất, bụi bốc lên khi chạm đất
+  drawGear(P,def,LL,WH2);
   if(VS){
+    const st=1-.03*easeIO(p);ctx.scale(st,st); // xe hạ thấp một chút khi ghim
     ctx.drawImage(VS,-LL/2,-WH2/2,LL,WH2);
+    if(def.canDeploy&&p>.95){ // đèn hiệu nhấp nháy báo đã ghim xong
+      const bl=Math.sin(performance.now()/1000*9)>0;
+      ctx.fillStyle=bl?'#ffb02e':'#7a5316';ctx.beginPath();ctx.arc(-LL*.08,0,3.2,0,TAU);ctx.fill();
+      if(bl){const gg=ctx.createRadialGradient(-LL*.08,0,0,-LL*.08,0,16);gg.addColorStop(0,'rgba(255,176,46,.55)');gg.addColorStop(1,'rgba(255,176,46,0)');ctx.fillStyle=gg;ctx.beginPath();ctx.arc(-LL*.08,0,16,0,TAU);ctx.fill();}
+    }
     if(P.hitT>0){ctx.globalAlpha=clamp(P.hitT*2,0,.5);ctx.fillStyle='#ff3b2f';ctx.fillRect(-LL/2,-WH2/2,LL,WH2);ctx.globalAlpha=1;}
     ctx.restore();return;
   }
@@ -1405,7 +1462,7 @@ gcv.addEventListener('pointerleave',()=>{gHover=null;});
 gcv.addEventListener('click',e=>{const b=gbayAt(e);if(b){view=b.id;sure=null;renderGarage();}});
 function buildMenu(){
   $('levels').innerHTML=LEVELS.map((l,i)=>
-    '<button class="lv" data-i="'+i+'"><b>'+l.ef+'</b><small>'+l.name+'<br>Gió đỉnh khoảng '+l.v+' km/h</small></button>').join('');
+    '<button class="lv" data-i="'+i+'"><b>'+l.ef+'</b><small>'+l.name+' · <i>'+l.en+'</i><br>Gió đỉnh khoảng '+l.v+' km/h</small></button>').join('');
   $('levels').querySelectorAll('.lv').forEach(b=>b.onclick=()=>{const i=+b.dataset.i;if(i<save.unlocked){sel.lv=i;refreshMenu();}});
 }
 function refreshMenu(){

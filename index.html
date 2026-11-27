@@ -28,6 +28,12 @@ button{font:inherit;color:inherit;cursor:pointer}
 h1{text-shadow:0 2px 18px rgba(0,0,0,.7)}
 #start:disabled{opacity:.5;cursor:wait}
 
+.codebox{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px}
+.codebox input{background:#0d151d;border:1px solid var(--line);border-radius:10px;color:var(--text);font:inherit;font-size:14px;letter-spacing:.08em;text-transform:uppercase;padding:10px 12px;width:180px;user-select:text;-webkit-user-select:text}
+.codebox input:focus{outline:2px solid #6fb3ff;outline-offset:1px}
+#codeMsg{font-size:13px;color:var(--dim)}
+#codeMsg.ok{color:var(--green)}#codeMsg.bad{color:#ff8a7d}
+
 /* ---------- gara trưng bày ---------- */
 .coins{margin-left:10px;background:#2b2412;border:1px solid #6b5521;color:#ffd36b;border-radius:20px;padding:3px 12px;font-size:13px;letter-spacing:.02em;text-transform:none;font-weight:700}
 #garage{background:linear-gradient(#141c25,#10171e);border:1px solid var(--line);border-radius:18px;overflow:hidden}
@@ -221,6 +227,12 @@ kbd{background:#0d151d;border:1px solid var(--line);border-bottom-width:2px;bord
       <div class="gscene"><canvas id="gcv"></canvas><div class="gcap">Bấm vào chỗ đậu để xem xe</div></div>
       <div class="info" id="ginfo"></div>
     </div>
+  </div>
+
+  <div class="codebox">
+    <input id="codeIn" type="text" placeholder="Nhập mã" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="24">
+    <button id="codeBtn" class="btn ghost sm">Dùng mã</button>
+    <span id="codeMsg"></span>
   </div>
 
   <h2>2 · Chọn mùa bão <button class="linkbtn" id="unlockAll">mở khóa tất cả mùa</button><button class="linkbtn" id="cheatCoins">+1000 xu (chơi thử)</button></h2>
@@ -1403,6 +1415,30 @@ $('start').onclick=()=>{
 };
 $('unlockAll').onclick=()=>{save.unlocked=LEVELS.length;writeSave();refreshMenu();};
 $('cheatCoins').onclick=()=>{save.coins+=1000;writeSave();refreshMenu();};
+
+// mã nhập tay (ô "Nhập mã" dưới gara)
+const CODES={
+  MOXE:()=>{                               // mở toàn bộ xe, xe mới chạy vào gara
+    const add=BAY_ORDER.filter(id=>!owns(id));
+    if(!add.length)return ['Gara đã đủ cả 6 xe rồi.','bad'];
+    add.forEach((id,i)=>{save.owned.push(id);gcars[id]={p:0,dir:1,run:1,delay:.2+i*.5,dur:carDur(id)};});
+    return ['Đã mở '+add.length+' xe mới. Xem chúng chạy vào gara!','ok'];
+  },
+  XU5000:()=>{save.coins+=5000;return ['Đã cộng 5000 xu.','ok'];},
+  MOMUA:()=>{save.unlocked=LEVELS.length;return ['Đã mở tất cả các mùa bão.','ok'];}
+};
+function useCode(){
+  const raw=$('codeIn').value.trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
+  if(!raw)return;
+  const fn=CODES[raw],msg=$('codeMsg');
+  if(!fn){msg.textContent='Mã không đúng.';msg.className='bad';return;}
+  initAudio();
+  const [t,cls]=fn();
+  if(cls==='ok'){sfx(660,.3,'triangle',.18,1.5);writeSave();refreshMenu();$('codeIn').value='';}
+  msg.textContent=t;msg.className=cls;
+}
+$('codeBtn').onclick=useCode;
+$('codeIn').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')useCode();});
 buildMenu();refreshMenu();
 $('start').disabled=true;$('start').textContent='Đang tải ảnh...';
 const imgsReady=loadImages().then(()=>{imgsDone=true;$('start').disabled=false;refreshMenu();parkAll(true);});

@@ -828,7 +828,7 @@ function endGame(win,msg){
       '<tr><td>Thân xe còn lại</td><td>'+hpPct+'%</td></tr>'+
       '<tr><td>Gió mạnh nhất xe từng chịu</td><td>'+Math.round(g.maxWind)+' km/h ('+efName(g.maxWind)+')</td></tr>'+
       (win?'<tr><td>Điểm</td><td>'+score+(newBest?' · kỷ lục mới':'')+'</td></tr>':'')+
-      '<tr><td>Xu thưởng</td><td>🪙 +'+coins+' (đang có '+save.coins+')</td></tr>'+
+      '<tr><td>Xu thưởng</td><td>💰 +'+coins+' (đang có '+save.coins+')</td></tr>'+
       '</table>'+
       newCarHint()+
       '<div class="did"><b>Bạn có biết?</b> '+pick(FACTS)+'</div>'+
@@ -1174,7 +1174,7 @@ function renderGarage(){
   const ub=$('useBtn');if(ub)ub.onclick=()=>{sel.veh=v.id;refreshMenu();};
   const bb=$('buyBtn');if(bb)bb.onclick=()=>buyVehicle(v.id);
   const n=save.owned.length;
-  $('coins').textContent='🪙 '+save.coins+' xu · '+n+'/'+VEHICLES.length+' xe';
+  $('coins').textContent='💰 '+save.coins+' xu · '+n+'/'+VEHICLES.length+' xe';
 }
 function buyVehicle(id){
   const price=PRICE[id]||0;

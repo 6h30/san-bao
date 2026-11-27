@@ -1175,7 +1175,7 @@ const BAY_W=(GX1-GX0)/3;
 const SHORT={tiv1:'TIV 1',tiv2:'TIV 2',tiv3:'TIV 3',dom3:'DOMINATOR 3',arma:'ARMADILLO',dow:'DOPPLER ON WHEELS'};
 const BAYS=BAY_ORDER.map((id,i)=>{
   const col=i%3,top=i<3,x=GX0+BAY_W*col;
-  return {id,x,w:BAY_W,top,y:top?38:308,h:176,cx:x+BAY_W/2,cy:top?126:398,hd:top?-Math.PI/2:Math.PI/2};
+  return {id,x,w:BAY_W,top,y:top?37:304,h:top?174:177,cx:x+BAY_W/2,cy:top?124:392,hd:top?-Math.PI/2:Math.PI/2};
 });
 const gcv=$('gcv'),gctx=gcv.getContext('2d');
 let gW=0,gBG=null,gHover=null,glast=performance.now(),starting=false;
@@ -1231,9 +1231,13 @@ function drawCarSprite(g,id,x,y,hd,sil,alpha){
 }
 
 // nền nhà gara vẽ một lần cho mỗi cỡ màn hình
+// ảnh nền nhà gara do người dùng tạo (không bắt buộc): có thì dùng, không có thì tự vẽ bằng code
+const gbgImg=new Image();
+gbgImg.onload=()=>{gW=0;};gbgImg.src='img/garage_bg.jpg';
 function renderGBG(){
   const k=gW/GW,off=document.createElement('canvas');off.width=gW;off.height=Math.round(GH*k);
   const g=off.getContext('2d');g.scale(k,k);
+  if(gbgImg.complete&&gbgImg.naturalWidth>0){g.drawImage(gbgImg,0,0,GW,GH);return off;}
   // ngoài trời: cỏ + lối xe vào
   g.fillStyle='#2b4228';g.fillRect(0,0,GW,GH);
   const ap=g.createLinearGradient(0,0,GX0,0);ap.addColorStop(0,'#2b2f35');ap.addColorStop(1,'#3d434a');
@@ -1311,7 +1315,8 @@ function drawGarage(){
   for(const b of BAYS){
     const own=owns(b.id);
     const pool=g.createRadialGradient(b.cx,b.cy,10,b.cx,b.cy,150);
-    pool.addColorStop(0,'rgba(255,244,214,'+(own?.32:.05)+')');pool.addColorStop(1,'rgba(255,244,214,0)');
+    const hasBg=gbgImg.complete&&gbgImg.naturalWidth>0;       // ảnh nền đã có đèn sáng sẵn nên pha nhẹ hơn
+    pool.addColorStop(0,'rgba(255,244,214,'+(own?(hasBg?.12:.32):.05)+')');pool.addColorStop(1,'rgba(255,244,214,0)');
     g.fillStyle=pool;g.fillRect(b.x,b.y-4,b.w,b.h+8);
     if(!own){
       g.fillStyle='rgba(6,8,12,.38)';g.fillRect(b.x+2,b.y,b.w-4,b.h);

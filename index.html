@@ -163,7 +163,13 @@ kbd{background:#0d151d;border:1px solid var(--line);border-bottom-width:2px;bord
   font-size:26px;pointer-events:auto;touch-action:none;display:flex;align-items:center;justify-content:center;color:#fff}
 .tb.on{background:rgba(255,178,62,.45)}
 #tL{left:16px;bottom:84px}#tR{left:100px;bottom:84px}#tU{right:100px;bottom:112px}#tD{right:100px;bottom:28px}
-#tA{right:16px;bottom:62px;width:78px;height:78px;background:rgba(255,178,62,.28);font-size:14px;font-weight:800}
+#tA{right:14px;bottom:56px;width:98px;height:98px;background:rgba(255,178,62,.34);border-color:rgba(255,178,62,.9);font-size:17px;font-weight:800;line-height:1.1;text-align:center;box-shadow:0 0 0 4px rgba(255,178,62,.18)}
+#tA.act{background:rgba(255,178,62,.85);color:#1b1305}
+#tA{white-space:pre-line}
+#tU{right:124px;bottom:128px}#tD{right:124px;bottom:42px}
+#tL{bottom:70px}#tR{bottom:70px}
+body.touch #hw{bottom:190px}
+body.touch #hint{bottom:34%}
 
 /* ---------- overlay (pause / end) ---------- */
 #ov{position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;background:rgba(6,9,13,.72);padding:16px}
@@ -516,7 +522,7 @@ function startGame(vehId,lvIdx){
   $('lvl').textContent='Lốc '+L.ef+' · '+L.name;
   $('hint').style.opacity=1;
   $('hint').innerHTML=def.canDeploy
-    ? '<b>Cách chơi:</b> chạy tới gần cơn lốc, giữ khoảng cách vừa đủ rồi nhấn <b>SPACE (GHIM)</b>. Xe ghim xong mới ghi được dữ liệu. Đừng ghim sát thành lốc nếu gió vượt sức chịu của xe.'
+    ? '<b>Cách chơi:</b> chạy tới gần cơn lốc, giữ khoảng cách vừa đủ rồi nhấn '+(isTouch?'nút cam <b>GHIM</b> ở góc phải dưới':'<b>SPACE (GHIM)</b>')+'. Xe ghim xong mới ghi được dữ liệu. Đừng ghim sát thành lốc nếu gió vượt sức chịu của xe.'
     : '<b>Cách chơi:</b> xe radar ghi dữ liệu từ xa, không cần ghim. Chạy vào tầm quét nhưng tránh vùng gió mạnh hơn 150 km/h.';
   $('menu').style.display='none';$('ov').style.display='none';
   $('hud').style.display='block';
@@ -530,7 +536,8 @@ function startGame(vehId,lvIdx){
    Đầu vào
    ========================================================= */
 const keys={};let paused=false,isTouch=false;
-try{isTouch=matchMedia('(pointer:coarse)').matches||('ontouchstart' in window);}catch(e){}
+try{isTouch=matchMedia('(pointer:coarse)').matches||('ontouchstart' in window)||(navigator.maxTouchPoints>0)||innerWidth<=820;}catch(e){}
+if(isTouch)document.body.classList.add('touch');
 addEventListener('keydown',e=>{
   const k=e.key.toLowerCase();
   if([' ','arrowup','arrowdown','arrowleft','arrowright'].includes(k))e.preventDefault();
@@ -766,6 +773,7 @@ function hud(V,rating){
   $('hp').firstElementChild.style.width=hpPct+'%';
   $('hp').className='bar'+(hpPct>55?' ok':'');
   $('an').firstElementChild.style.width=(def.canDeploy?P.dep*100:0)+'%';
+  if(isTouch){const ta=$('tA');ta.classList.toggle('act',!!P.depWant);ta.textContent=!def.canDeploy?'RADAR':P.dep>=.95?'NHẢ XE':P.depWant?'ĐANG\nGHIM':'GHIM XE';}
   const dp=g.data/L.target*100;
   $('dt').firstElementChild.style.width=dp+'%';$('dtxt').textContent=Math.floor(dp)+'%';
   $('timer').textContent=Math.max(0,Math.ceil(g.T.life-g.T.age))+' s';
@@ -1102,7 +1110,7 @@ function drawArrow(g,camX,camY){
 }
 
 function drawMinimap(g){
-  const mw=Math.min(170,VW*.3),mh=mw*WH/WW,x=VW-mw-12,y=VH-mh-12-(isTouch?150:0);
+  const mw=Math.min(170,VW*.3),mh=mw*WH/WW,x=VW-mw-12,y=VH-mh-12-(isTouch?210:0);
   ctx.fillStyle='rgba(12,18,25,.82)';ctx.fillRect(x-3,y-3,mw+6,mh+6);
   ctx.fillStyle='#4a6330';ctx.fillRect(x,y,mw,mh);
   const k=mw/WW;

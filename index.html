@@ -13,7 +13,7 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);
   font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;user-select:none;-webkit-user-select:none}
-#cv{position:fixed;inset:0;display:block;touch-action:none}
+#cv{position:fixed;left:0;top:0;width:100vw;height:100vh;height:100dvh;display:block;touch-action:none}
 button{font:inherit;color:inherit;cursor:pointer}
 
 /* ---------- menu ---------- */
@@ -420,6 +420,7 @@ function resize(){
   DPR=Math.min(2,window.devicePixelRatio||1);VW=innerWidth;VH=innerHeight;
   cv.width=Math.round(VW*DPR);cv.height=Math.round(VH*DPR);
   zoom=clamp(Math.min(VW,VH)/700,.55,1.25);
+  if(VW<=820)zoom=Math.max(zoom,.8); // điện thoại: phóng to để thấy rõ xe
 }
 addEventListener('resize',resize);resize();
 
